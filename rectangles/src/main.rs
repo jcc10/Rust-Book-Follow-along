@@ -75,7 +75,6 @@ fn main2() {
 
 fn main3() {
 
-    let scale = 1;
     let rect1 = Rectangle::square(10);
 
     println!("rect1 is {:?}", rect1);
