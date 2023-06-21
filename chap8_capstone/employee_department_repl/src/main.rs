@@ -2,13 +2,13 @@
 use std::io;
 use std::collections::HashMap;
 
-// TODO: Split this into different modules/files.
 mod command_parser;
 #[allow(unused_imports)]
 use crate::command_parser::{Command, parse_command, help_all, help};
 mod adders;
 use crate::adders::{AdderMethod, adder_wrapper};
-
+mod listers;
+use crate::listers::{list_all_departments, list_department};
 
 fn main() {
     let mut departments = HashMap::new();
@@ -27,51 +27,50 @@ fn main() {
             }
         };
 
-        match &cmd {
-            Command::Unknown(cmd) => {
-                println!("Unknown Command '{}'", cmd);
-                println!("Enter 'help' for all commands TODO");
-            }
-            Command::Add{user, dep} => {
-                println!("add | user: {}, dep: {}", user, dep);
-                adder_wrapper(
-                    &mut departments,
-                    user.to_string(),
-                    dep.to_string(),
-                    AdderMethod::GetMut,
-                );
-            }
-            Command::Search(dep) => {
-                println!("search | dep: {}", dep);
-            }
-            Command::Dump() => {
-                println!("List all deps");
-                list_all_departments(&departments)
-            }
-            Command::Warn{command, reason} => {
-                println!("warning on {} because of {}", command, reason);
-            }
+        match cmd {
             Command::Exit() => {
                 println!("Goodbye!");
                 break;
             }
+            other => {
+                command_handeler(&mut departments, other);
+            }
         }
+
     }
 }
 
-
-fn list_all_departments(hm: &HashMap<String, Vec<String>>){
-    //TODO: Sort the items.
-    let items: Vec<&String> = hm.keys().collect();
-    for key in items {
-        match hm.get(key) {
-            Some(vec) => {
-                println!("| {}", key);
-                for person in vec {
-                    println!("|-- {}", person);
-                }
-            }
-            None => continue,
-        };
+fn command_handeler(
+    departments: &mut HashMap<String, Vec<String>>,
+    cmd: Command
+){
+    match &cmd {
+        Command::Unknown(cmd) => {
+            println!("Unknown Command '{}'", cmd);
+            println!("Enter 'help' for all commands TODO");
+        }
+        Command::Add{user, dep} => {
+            println!("add | user: {}, dep: {}", user, dep);
+            adder_wrapper(
+                departments,
+                user.to_string(),
+                dep.to_string(),
+                AdderMethod::GetMut,
+            );
+        }
+        Command::Search(dep) => {
+            println!("search | dep: {}", dep);
+            list_department(departments, dep.to_string());
+        }
+        Command::Dump() => {
+            println!("List all deps");
+            list_all_departments(&departments)
+        }
+        Command::Warn{command, reason} => {
+            println!("warning on {} because of {}", command, reason);
+        }
+        Command::Exit() => {
+            println!("Unreachable line?")
+        }
     }
 }
